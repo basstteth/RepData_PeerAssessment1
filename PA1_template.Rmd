@@ -6,7 +6,6 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 ## Loading and preprocessing the data
 ```{r}
 activityData <- read.csv(file="activity.csv", header=TRUE)
@@ -35,7 +34,6 @@ ggplot(data = meanStepsByInt, aes(x = interval, y = steps)) +
 
 maxInt <- meanStepsByInt[which.max(meanStepsByInt$steps),]
 ```
-
 ## Imputing missing values
 ```{r}
 imp_activityData <- transform(activityData,
@@ -55,7 +53,6 @@ diffMean = impMeanSteps - meanSteps
 diffMed = impMedSteps - medSteps
 diffTotal = sum(impStepsByInt$steps) - sum(totalSteps$steps)
 ```
-
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r}
 DayType <- function(date) {
