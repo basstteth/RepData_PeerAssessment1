@@ -4,36 +4,103 @@ Untitled
 Loading and preprocessing the data
 ----------------------------------
 
-activityData &lt;- read.csv(file="activity.csv", header=TRUE)
+``` r
+activityData <- read.csv(file="activity.csv", header=TRUE)
+```
 
 What is mean total number of steps taken per day?
 -------------------------------------------------
 
-totalSteps &lt;- aggregate(steps ~ date, activityData, FUN=sum)
+``` r
+totalSteps <- aggregate(steps ~ date, activityData, FUN=sum)
 
-hist(totalSteps$steps, main = "Total Steps per Day", xlab = "Number of Steps")
+hist(totalSteps$steps,
+     main = "Total Steps per Day",
+     xlab = "Number of Steps")
+```
 
-meanSteps &lt;- mean(totalSteps*s**t**e**p**s*, *n**a*.*r**m* = *T**R**U**E*)*m**e**d**S**t**e**p**s* &lt; −*m**e**d**i**a**n*(*t**o**t**a**l**S**t**e**p**s*steps, na.rm = TRUE)
+![](PA1_template_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+``` r
+meanSteps <- mean(totalSteps$steps, na.rm = TRUE)
+medSteps <- median(totalSteps$steps, na.rm = TRUE)
+```
 
 What is the average daily activity pattern?
 -------------------------------------------
 
-library(ggplot2) meanStepsByInt &lt;- aggregate(steps ~ interval, activityData, mean) ggplot(data = meanStepsByInt, aes(x = interval, y = steps)) + geom\_line() + ggtitle("Average Daily Activity Pattern") + xlab("5-minute Interval") + ylab("Average Number of Steps") + theme(plot.title = element\_text(hjust = 0.5))
+``` r
+library(ggplot2)
+```
 
-maxInt &lt;- meanStepsByInt\[which.max(meanStepsByInt$steps),\]
+    ## Warning: package 'ggplot2' was built under R version 3.4.4
+
+``` r
+meanStepsByInt <- aggregate(steps ~ interval, activityData, mean)
+ggplot(data = meanStepsByInt, aes(x = interval, y = steps)) +
+  geom_line() +
+  ggtitle("Average Daily Activity Pattern") +
+  xlab("5-minute Interval") +
+  ylab("Average Number of Steps") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](PA1_template_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+maxInt <- meanStepsByInt[which.max(meanStepsByInt$steps),]
+```
 
 Imputing missing values
 -----------------------
 
-imp\_activityData &lt;- transform(activityData, steps = ifelse(is.na(activityData*s**t**e**p**s*),*m**e**a**n**S**t**e**p**s**B**y**I**n**t*steps\[match(activityData*i**n**t**e**r**v**a**l*, *m**e**a**n**S**t**e**p**s**B**y**I**n**t*interval)\], activityData$steps))
+``` r
+imp_activityData <- transform(activityData,
+                              steps = ifelse(is.na(activityData$steps),
+                                             meanStepsByInt$steps[match(activityData$interval, 
+                                                                        meanStepsByInt$interval)],
+                                             activityData$steps))
 
-impStepsByInt &lt;- aggregate(steps ~ date, imp\_activityData, FUN=sum) hist(impStepsByInt$steps, main = "Imputed Number of Steps Per Day", xlab = "Number of Steps")
+impStepsByInt <- aggregate(steps ~ date, imp_activityData, FUN=sum)
+hist(impStepsByInt$steps,
+     main = "Imputed Number of Steps Per Day",
+     xlab = "Number of Steps")
+```
 
-impMeanSteps &lt;- mean(impStepsByInt*s**t**e**p**s*, *n**a*.*r**m* = *T**R**U**E*)*i**m**p**M**e**d**S**t**e**p**s* &lt; −*m**e**d**i**a**n*(*i**m**p**S**t**e**p**s**B**y**I**n**t*steps, na.rm = TRUE) diffMean = impMeanSteps - meanSteps diffMed = impMedSteps - medSteps diffTotal = sum(impStepsByInt*s**t**e**p**s*)−*s**u**m*(*t**o**t**a**l**S**t**e**p**s*steps)
+![](PA1_template_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
+impMeanSteps <- mean(impStepsByInt$steps, na.rm = TRUE)
+impMedSteps <- median(impStepsByInt$steps, na.rm = TRUE)
+diffMean = impMeanSteps - meanSteps
+diffMed = impMedSteps - medSteps
+diffTotal = sum(impStepsByInt$steps) - sum(totalSteps$steps)
+```
 
 Are there differences in activity patterns between weekdays and weekends?
 -------------------------------------------------------------------------
 
-DayType &lt;- function(date) { day &lt;- weekdays(date) if (day %in% c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')) return ("weekeday") else if (day %in% c('Saturday', 'Sunday')) return ("weekend") else stop ("Invalid Date Format.") } imp\_activityData*d**a**t**e* &lt; −*a**s*.*D**a**t**e*(*i**m**p*<sub>*a*</sub>*c**t**i**v**i**t**y**D**a**t**a*date) imp\_activityData*d**a**y* &lt; −*s**a**p**p**l**y*(*i**m**p*<sub>*a*</sub>*c**t**i**v**i**t**y**D**a**t**a*date, FUN = DayType)
+``` r
+DayType <- function(date) {
+  day <- weekdays(date)
+  if (day %in% c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'))
+    return ("weekeday")
+  else if (day %in% c('Saturday', 'Sunday'))
+    return ("weekend")
+  else
+    stop ("Invalid Date Format.")
+}
+imp_activityData$date <- as.Date(imp_activityData$date)
+imp_activityData$day <- sapply(imp_activityData$date, FUN = DayType)
 
-meanStepsByDay &lt;- aggregate(steps ~ interval + day, imp\_activityData, mean) ggplot(data = meanStepsByDay, aes(x = interval, y = steps)) + geom\_line() + facet\_grid(day ~ .) + ggtitle("Average Daily Activity Pattern") + xlab("5-minute Interval") + ylab("Average Number of Steps") + theme(plot.title = element\_text(hjust = 0.5))
+meanStepsByDay <- aggregate(steps ~ interval + day, imp_activityData, mean)
+ggplot(data = meanStepsByDay, aes(x = interval, y = steps)) + 
+  geom_line() +
+  facet_grid(day ~ .) +
+  ggtitle("Average Daily Activity Pattern") +
+  xlab("5-minute Interval") +
+  ylab("Average Number of Steps") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+![](PA1_template_files/figure-markdown_github/unnamed-chunk-5-1.png)
